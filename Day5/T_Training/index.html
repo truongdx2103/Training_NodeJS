@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TEST FRONT END</title>
+</head>
+<body>
+    <h2>List users</h2>
+    <button id="reload" type="button">Load list users</button>
+    <table>
+        <thread>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thread>
+        <tbody id="list-users"></tbody>
+    </table>
+    <input type="number" id="id" placeholder="Input ID">
+    <input type="text" id="name" placeholder="Input Name">
+    <button onclick="createUser()">Create user</button>
+    <script>
+        async function callAPI(method = 'GET', data) {
+            console.log(method)
+            const options = { method };
+            // const options = {
+            //     method: method,
+            //     headers: { 'Content-Type': 'application/json'}
+            // };
+
+            if (data != null) {
+                options.headers = { 'Content-Type': 'application/json'}
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch('http://localhost:3000/api/users', options);
+            const body = await response.json();
+            console.log(body);
+            return body;
+        }
+
+        async function showResult(action) {
+            const data = await action();
+            const tbody = document.getElementById('list-users');
+
+            tbody.replaceChildren() // Reset data
+
+            for (const dt of data) {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = dt.id;
+                row.insertCell().textContent = dt.name;
+            }
+
+            console.log('OK')
+        }
+
+        document.getElementById('reload').addEventListener('click', () => {
+            showResult(callAPI);
+        });
+
+        async function createUser() {
+            const id = document.getElementById("id").value.trim();
+            const name = document.getElementById("name").value.trim();
+            const result = await callAPI('POST', { id: id, name: name});
+            console.log(result);
+        }
+    </script>
+</body>
+</html>
